@@ -1,0 +1,24 @@
+# File oggetto compilati
+*.o
+
+# File eseguibili
+*.elf
+
+# File temporanei dell'editor
+*~
+*.swp
+
+# Cartelle di build
+/build/
+/bin/
+/obj/
+
+# File di log
+*.log
+
+# File di backup o temporanei
+*.bak
+*.tmp
+
+# VS Code settings (facoltativo ignorare)
+.vscode/
