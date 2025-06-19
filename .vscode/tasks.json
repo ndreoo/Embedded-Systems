@@ -1,0 +1,147 @@
+
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Assembla .s",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "for file in ./*.s; do riscv64-unknown-elf-as -g -march=${input:arch} -mabi=${input:abi} -o \"${file%.s}.o\" \"$file\"; done"
+      ],
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Compila .c",
+      "type": "shell",
+      "command": "riscv64-unknown-elf-gcc",
+      "args": [
+        "-c",
+        "-g",
+        "-O0",
+        "-ffreestanding",
+        "-march=${input:arch}",
+        "-mabi=${input:abi}",
+        "-o", "${input:cObj}.o",
+        "${input:cFile}.c"
+      ],
+      "problemMatcher": ["$gcc"],
+      "group": "build"
+    },
+    {
+      "label": "Link ELF (dinamico)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c", 
+        "riscv64-unknown-elf-ld -Tbaremetal.ld -m elf32lriscv -o ${input:elfOutput}.elf ./*.o"
+      ],
+      "dependsOrder": "parallel",
+      "dependsOn":["Assembla .s","Compila .c"],
+      "problemMatcher": ["$gcc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Run Spike (with RBB)",
+      "type": "shell",
+      "command": "spike",
+      "args": [
+        "--isa=rv32i",
+        "--rbb-port=9824",
+        "-m0x80000000:0x20000",
+        "--halted",
+        "./*.elf"
+      ],
+      "dependsOn": ["Link ELF"],
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": "Listening for remote bitbang connection",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "Listening for remote bitbang connection",
+            "endsPattern": "Listening for remote bitbang connection"
+          }
+        }
+      ]
+    },
+    {
+      "label": "Run OpenOCD",
+      "type": "shell",
+      "command": "openocd",
+      "args": [
+        "-f", "spike.cfg" 
+      ],
+      "dependsOn": ["Run Spike (with RBB)"],
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": "Listening on port.*3333",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "Listening on port.*3333",
+            "endsPattern": "Listening on port.*3333"
+          }
+        }
+      ]
+    },
+    {
+      "label": "Setup Spike Debug",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Run Spike (with RBB)", "Run OpenOCD"],
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "arch",
+      "type": "pickString",
+      "description": "Scegli l'architettura RISC-V",
+      "options": ["rv32i", "rv32imac", "rv64gc"],
+      "default": "rv32i"
+    },
+    {
+      "id": "abi",
+      "type": "pickString",
+      "description": "Scegli l'ABI",
+      "options": ["ilp32", "lp64"],
+      "default": "ilp32"
+    },
+    {
+      "id": "cFile",
+      "type": "promptString",
+      "description": "Nome file sorgente C (senza estensione)",
+    },
+    {
+      "id": "cObj",
+      "type": "promptString",
+      "description": "Nome file oggetto C (senza estensione)",
+    },
+    {
+      "id": "elfOutput",
+      "type": "promptString",
+      "description": "Nome file ELF di output (senza estensione)"
+    }
+  ]
+}
+
+

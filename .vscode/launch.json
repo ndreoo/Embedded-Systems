@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name":"Debug with Venus",
+      "type": "venus",
+      "request": "launch",
+      "program": "${workspaceFolder}/ledMatrix.s",
+      "stopOnEntry": true,
+      "stopAtBreakpoints": true
+    },
+
+    {
+      "name": "Debug con Spike+OpenOCD",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.elf",
+      "cwd": "${workspaceFolder}",
+      "miDebuggerPath": "riscv64-unknown-elf-gdb",
+      "MIMode": "gdb",
+      "miDebuggerServerAddress": "localhost:3333",
+      "stopAtEntry": true,
+      "externalConsole": false,
+      "preLaunchTask": "Setup Spike Debug",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing delle strutture C",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}

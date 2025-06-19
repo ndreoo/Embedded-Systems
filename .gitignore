@@ -20,5 +20,3 @@
 *.bak
 *.tmp
 
-# VS Code settings (facoltativo ignorare)
-.vscode/
