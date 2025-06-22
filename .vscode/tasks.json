@@ -8,17 +8,15 @@
       "command": "bash",
       "args": [
         "-c",
-        "for file in ./*.s; do ${input:debugInputAs} -g -march=${input:arch} -mabi=${input:abi} -o \"${file%.s}.o\" \"$file\"; done"
-        //riscv64-unknown-elf-as
+        "for file in ./*.s; do ${input:assInput} -g -march=${input:arch} -mabi=${input:abi} -o \"${file%.s}.o\" \"$file\"; done"
       ],
       "problemMatcher": [],
       "group": "build"
-    },
+    },/*
     {
       "label": "Compila .c",
       "type": "shell",
-      //"command": "riscv64-unknown-elf-gcc",
-      "command": "${input:debugInputC}",
+      "command": "${input:compInput}",
       "args": [
         "-c",
         "-g",
@@ -31,20 +29,46 @@
       ],
       "problemMatcher": ["$gcc"],
       "group": "build"
+    }*/
+    {
+      "label": "Compila .c",
+      "type": "shell",
+      "command": "bash",
+        "args": [
+          "-c",
+          "for file in ./*.c; do ${input:compInput} -c -g -O0 -ffreestanding -march=${input:arch} -mabi=${input:abi} -o \"${file%.c}.o\" \"$file\"; done"
+        ],
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Link ELF (single)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c", 
+        "${input:linkerInput} -Tbaremetal.ld -m elf32lriscv -o ${input:elfOutput}.elf ./*.o"
+      ],
+      //"dependsOrder": "sequence",
+      //"dependsOn":["Assembla .s","Compila .c"],
+      "problemMatcher": ["$gcc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     },
     {
       "label": "Link ELF",
       "type": "shell",
-      "command": "bash",
-      //"command":"riscv64-unknown-elf-ld",
+      "command": "${workspaceFolder}/linkELF.sh",
       "args": [
-        "-c", 
-        "${input:debugInputLd} -Tbaremetal.ld -m elf32lriscv -o ${input:elfOutput}.elf ./*.o"
-        //${input:elfOutput}.elf
+        "${input:assInput}",
+        "${input:arch}",
+        "${input:abi}",
+        "${input:compInput}",
+        "${input:linkerInput}"
       ],
-      "dependsOrder": "sequence",
-      "dependsOn":["Assembla .s","Compila .c"],
-      "problemMatcher": ["$gcc"],
+      "problemMatcher": [],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -53,18 +77,13 @@
     {
       "label": "Run Spike (with RBB)",
       "type": "shell",
-      //"command": "bash",
       "command": "spike",
       "args": [
-        //"-c", //forse -c è un problema
-        //"spike",
         "--isa=rv32i",
         "--rbb-port=9824",
         "-m0x80000000:0x20000",
         "--halted",
         "./*.elf"
-        //"./*.elf"
-        //"${input:elfOutput}.elf"
       ],
       "dependsOn": ["Link ELF"],
       "isBackground": true,
@@ -151,26 +170,32 @@
       "description": "Nome file ELF di output (senza estensione)"
     },
     {
-      "id": "debugInputAs",
+      "id": "assInput",
       "type": "pickString",
-      "description": "Nome debugger",
+      "description": "Nome assemblatore [.s]",
       "options": ["riscv32-unknown-elf-as", "riscv64-unknown-elf-as"],
       "default": "riscv64-unknown-elf-as"
     },
     {
-      "id": "debugInputC",
+      "id": "compInput",
       "type": "pickString",
-      "description": "Nome debugger .c",
+      "description": "Nome compilatore [.c]",
       "options": ["riscv32-unknown-elf-gcc", "riscv64-unknown-elf-gcc"],
       "default": "riscv64-unknown-elf-gcc"
     },
     {
-      "id": "debugInputLd",
+      "id": "linkerInput",
       "type": "pickString",
-      "description": "Nome debugger .ld",
+      "description": "Nome linker [.ld]",
       "options": ["riscv32-unknown-elf-ld", "riscv64-unknown-elf-ld"],
       "default": "riscv64-unknown-elf-ld"
-    }
+    }/*,
+    {
+      "id": "existelf",
+      "type": "pickString",
+      "description": "Hai già creato tutti i .o?",
+      "options": ["Link ELF", "Link ELF (single)"]
+    }*/
 
   ]
 }
