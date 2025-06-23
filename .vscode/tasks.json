@@ -42,33 +42,16 @@
       "group": "build"
     },
     {
-      "label": "Link ELF (single)",
+      "label": "Link ELF",
       "type": "shell",
       "command": "bash",
       "args": [
         "-c", 
         "${input:linkerInput} -Tbaremetal.ld -m elf32lriscv -o ${input:elfOutput}.elf ./*.o"
       ],
-      //"dependsOrder": "sequence",
-      //"dependsOn":["Assembla .s","Compila .c"],
+      "dependsOrder": "sequence",
+      "dependsOn":["Assembla .s","Compila .c"],
       "problemMatcher": ["$gcc"],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
-    },
-    {
-      "label": "Link ELF",
-      "type": "shell",
-      "command": "${workspaceFolder}/linkELF.sh",
-      "args": [
-        "${input:assInput}",
-        "${input:arch}",
-        "${input:abi}",
-        "${input:compInput}",
-        "${input:linkerInput}"
-      ],
-      "problemMatcher": [],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -189,13 +172,7 @@
       "description": "Nome linker [.ld]",
       "options": ["riscv32-unknown-elf-ld", "riscv64-unknown-elf-ld"],
       "default": "riscv64-unknown-elf-ld"
-    }/*,
-    {
-      "id": "existelf",
-      "type": "pickString",
-      "description": "Hai già creato tutti i .o?",
-      "options": ["Link ELF", "Link ELF (single)"]
-    }*/
+    }
 
   ]
 }
