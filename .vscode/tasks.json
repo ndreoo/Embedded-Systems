@@ -12,24 +12,7 @@
       ],
       "problemMatcher": [],
       "group": "build"
-    },/*
-    {
-      "label": "Compila .c",
-      "type": "shell",
-      "command": "${input:compInput}",
-      "args": [
-        "-c",
-        "-g",
-        "-O0",
-        "-ffreestanding",
-        "-march=${input:arch}",
-        "-mabi=${input:abi}",
-        "-o", "${input:cObj}.o",  
-        "${input:cFile}.c"
-      ],
-      "problemMatcher": ["$gcc"],
-      "group": "build"
-    }*/
+    },
     {
       "label": "Compila .c",
       "type": "shell",
@@ -136,16 +119,6 @@
       "description": "Scegli l'ABI",
       "options": ["ilp32", "lp64"],
       "default": "ilp32"
-    },
-    {
-      "id": "cFile",
-      "type": "promptString",
-      "description": "Nome file sorgente C (senza estensione)",
-    },
-    {
-      "id": "cObj",
-      "type": "promptString",
-      "description": "Nome file oggetto C (senza estensione)",
     },
     {
       "id": "elfOutput",
